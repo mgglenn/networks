@@ -1,0 +1,252 @@
+include Make.defines
+
+PROGS =	 passwordBreaker passwordServer
+
+OPTIONS = -DUNIX  -DUSE_SIGACTION -DANSI
+
+
+COBJECTS =	createNewPassword.o 
+CSOURCES =	createNewPassword.c 
+
+CPLUSOBJECTS = 
+
+COMMONSOURCES =
+
+CPLUSSOURCES =
+
+all:	${PROGS}
+
+passwordBreaker:	passwordBreaker.o $(CPLUSOBJECTS) $(COBJECTS) $(LIBS) $(COMMONSOURCES) $(SOURCES)
+		${CC} ${LINKOPTIONS}  $@ passwordBreaker.o $(CPLUSOBJECTS) $(COBJECTS) $(LIBS) $(LINKFLAGS)
+
+
+passwordServer:		passwordServer.o $(CPLUSOBJECTS) $(COBJECTS)
+		${CC} ${LINKOPTIONS} $@ passwordServer.o $(CPLUSOBJECTS) $(COBJECTS) $(LIBS) $(LINKFLAGS)
+
+
+.cc.o:	$(HEADERS)
+	$(CPLUS) $(CPLUSFLAGS) $(OPTIONS) $<
+
+.c.o:	$(HEADERS)
+	$(CC) $(CFLAGS) $(OPTIONS) $<
+
+backup:
+	rm -f mgglenn-hw1.tar.gz
+	tar -cf mgglenn-hw1.tar *
+	gzip -f mgglenn-hw1.tar
+
+clean:
+		rm -f ${PROGS} ${CLEANFILES}
+
+depend:
+		makedepend passwordBreaker.c passwordServer.c  $(CFLAGS) $(HEADERS) $(SOURCES) $(COMMONSOURCES) $(CSOURCES)
+#		mkdep $(CFLAGS) $(HEADERS) $(SOURCES) $(COMMONSOURCES) $(CSOURCES)# DO NOT DELETE
+
+passwordBreaker.o: password.h /usr/include/stdio.h /usr/include/features.h
+passwordBreaker.o: /usr/include/stdc-predef.h /usr/include/sys/cdefs.h
+passwordBreaker.o: /usr/include/bits/wordsize.h /usr/include/gnu/stubs.h
+passwordBreaker.o: /usr/include/bits/types.h /usr/include/bits/typesizes.h
+passwordBreaker.o: /usr/include/libio.h /usr/include/_G_config.h
+passwordBreaker.o: /usr/include/wchar.h /usr/include/bits/stdio_lim.h
+passwordBreaker.o: /usr/include/bits/sys_errlist.h /usr/include/stdlib.h
+passwordBreaker.o: /usr/include/sys/types.h /usr/include/time.h
+passwordBreaker.o: /usr/include/endian.h /usr/include/bits/endian.h
+passwordBreaker.o: /usr/include/bits/byteswap.h
+passwordBreaker.o: /usr/include/bits/byteswap-16.h /usr/include/sys/select.h
+passwordBreaker.o: /usr/include/bits/select.h /usr/include/bits/sigset.h
+passwordBreaker.o: /usr/include/bits/time.h /usr/include/sys/sysmacros.h
+passwordBreaker.o: /usr/include/bits/pthreadtypes.h /usr/include/alloca.h
+passwordBreaker.o: /usr/include/bits/stdlib-float.h /usr/include/errno.h
+passwordBreaker.o: /usr/include/bits/errno.h /usr/include/linux/errno.h
+passwordBreaker.o: /usr/include/asm/errno.h /usr/include/asm-generic/errno.h
+passwordBreaker.o: /usr/include/asm-generic/errno-base.h
+passwordBreaker.o: /usr/include/string.h /usr/include/netinet/in.h
+passwordBreaker.o: /usr/include/stdint.h /usr/include/bits/wchar.h
+passwordBreaker.o: /usr/include/sys/socket.h /usr/include/sys/uio.h
+passwordBreaker.o: /usr/include/bits/uio.h /usr/include/bits/socket.h
+passwordBreaker.o: /usr/include/bits/socket_type.h
+passwordBreaker.o: /usr/include/bits/sockaddr.h /usr/include/asm/socket.h
+passwordBreaker.o: /usr/include/asm-generic/socket.h
+passwordBreaker.o: /usr/include/asm/sockios.h
+passwordBreaker.o: /usr/include/asm-generic/sockios.h /usr/include/bits/in.h
+passwordBreaker.o: /usr/include/arpa/inet.h /usr/include/netdb.h
+passwordBreaker.o: /usr/include/rpc/netdb.h /usr/include/bits/netdb.h
+passwordBreaker.o: /usr/include/unistd.h /usr/include/bits/posix_opt.h
+passwordBreaker.o: /usr/include/bits/environments.h
+passwordBreaker.o: /usr/include/bits/confname.h /usr/include/getopt.h
+passwordBreaker.o: /usr/include/signal.h /usr/include/bits/signum.h
+passwordBreaker.o: /usr/include/bits/siginfo.h /usr/include/bits/sigaction.h
+passwordBreaker.o: /usr/include/bits/sigcontext.h
+passwordBreaker.o: /usr/include/bits/sigstack.h /usr/include/bits/sigthread.h
+passwordServer.o: password.h /usr/include/stdio.h /usr/include/features.h
+passwordServer.o: /usr/include/stdc-predef.h /usr/include/sys/cdefs.h
+passwordServer.o: /usr/include/bits/wordsize.h /usr/include/gnu/stubs.h
+passwordServer.o: /usr/include/bits/types.h /usr/include/bits/typesizes.h
+passwordServer.o: /usr/include/libio.h /usr/include/_G_config.h
+passwordServer.o: /usr/include/wchar.h /usr/include/bits/stdio_lim.h
+passwordServer.o: /usr/include/bits/sys_errlist.h /usr/include/stdlib.h
+passwordServer.o: /usr/include/sys/types.h /usr/include/time.h
+passwordServer.o: /usr/include/endian.h /usr/include/bits/endian.h
+passwordServer.o: /usr/include/bits/byteswap.h
+passwordServer.o: /usr/include/bits/byteswap-16.h /usr/include/sys/select.h
+passwordServer.o: /usr/include/bits/select.h /usr/include/bits/sigset.h
+passwordServer.o: /usr/include/bits/time.h /usr/include/sys/sysmacros.h
+passwordServer.o: /usr/include/bits/pthreadtypes.h /usr/include/alloca.h
+passwordServer.o: /usr/include/bits/stdlib-float.h /usr/include/errno.h
+passwordServer.o: /usr/include/bits/errno.h /usr/include/linux/errno.h
+passwordServer.o: /usr/include/asm/errno.h /usr/include/asm-generic/errno.h
+passwordServer.o: /usr/include/asm-generic/errno-base.h /usr/include/string.h
+passwordServer.o: /usr/include/netinet/in.h /usr/include/stdint.h
+passwordServer.o: /usr/include/bits/wchar.h /usr/include/sys/socket.h
+passwordServer.o: /usr/include/sys/uio.h /usr/include/bits/uio.h
+passwordServer.o: /usr/include/bits/socket.h /usr/include/bits/socket_type.h
+passwordServer.o: /usr/include/bits/sockaddr.h /usr/include/asm/socket.h
+passwordServer.o: /usr/include/asm-generic/socket.h
+passwordServer.o: /usr/include/asm/sockios.h
+passwordServer.o: /usr/include/asm-generic/sockios.h /usr/include/bits/in.h
+passwordServer.o: /usr/include/arpa/inet.h /usr/include/netdb.h
+passwordServer.o: /usr/include/rpc/netdb.h /usr/include/bits/netdb.h
+passwordServer.o: /usr/include/unistd.h /usr/include/bits/posix_opt.h
+passwordServer.o: /usr/include/bits/environments.h
+passwordServer.o: /usr/include/bits/confname.h /usr/include/getopt.h
+createNewPassword.o: /usr/include/stdio.h /usr/include/features.h
+createNewPassword.o: /usr/include/stdc-predef.h /usr/include/sys/cdefs.h
+createNewPassword.o: /usr/include/bits/wordsize.h /usr/include/gnu/stubs.h
+createNewPassword.o: /usr/include/bits/types.h /usr/include/bits/typesizes.h
+createNewPassword.o: /usr/include/libio.h /usr/include/_G_config.h
+createNewPassword.o: /usr/include/wchar.h /usr/include/bits/stdio_lim.h
+createNewPassword.o: /usr/include/bits/sys_errlist.h /usr/include/stdlib.h
+createNewPassword.o: /usr/include/sys/types.h /usr/include/time.h
+createNewPassword.o: /usr/include/endian.h /usr/include/bits/endian.h
+createNewPassword.o: /usr/include/bits/byteswap.h
+createNewPassword.o: /usr/include/bits/byteswap-16.h
+createNewPassword.o: /usr/include/sys/select.h /usr/include/bits/select.h
+createNewPassword.o: /usr/include/bits/sigset.h /usr/include/bits/time.h
+createNewPassword.o: /usr/include/sys/sysmacros.h
+createNewPassword.o: /usr/include/bits/pthreadtypes.h /usr/include/alloca.h
+createNewPassword.o: /usr/include/bits/stdlib-float.h password.h
+createNewPassword.o: /usr/include/errno.h /usr/include/bits/errno.h
+createNewPassword.o: /usr/include/linux/errno.h /usr/include/asm/errno.h
+createNewPassword.o: /usr/include/asm-generic/errno.h
+createNewPassword.o: /usr/include/asm-generic/errno-base.h
+createNewPassword.o: /usr/include/string.h /usr/include/netinet/in.h
+createNewPassword.o: /usr/include/stdint.h /usr/include/bits/wchar.h
+createNewPassword.o: /usr/include/sys/socket.h /usr/include/sys/uio.h
+createNewPassword.o: /usr/include/bits/uio.h /usr/include/bits/socket.h
+createNewPassword.o: /usr/include/bits/socket_type.h
+createNewPassword.o: /usr/include/bits/sockaddr.h /usr/include/asm/socket.h
+createNewPassword.o: /usr/include/asm-generic/socket.h
+createNewPassword.o: /usr/include/asm/sockios.h
+createNewPassword.o: /usr/include/asm-generic/sockios.h
+createNewPassword.o: /usr/include/bits/in.h /usr/include/arpa/inet.h
+createNewPassword.o: /usr/include/netdb.h /usr/include/rpc/netdb.h
+createNewPassword.o: /usr/include/bits/netdb.h /usr/include/unistd.h
+createNewPassword.o: /usr/include/bits/posix_opt.h
+createNewPassword.o: /usr/include/bits/environments.h
+createNewPassword.o: /usr/include/bits/confname.h /usr/include/getopt.h
+# DO NOT DELETE
+
+passwordBreaker.o: password.h /usr/include/stdio.h /usr/include/features.h
+passwordBreaker.o: /usr/include/stdc-predef.h /usr/include/sys/cdefs.h
+passwordBreaker.o: /usr/include/bits/wordsize.h /usr/include/gnu/stubs.h
+passwordBreaker.o: /usr/include/bits/types.h /usr/include/bits/typesizes.h
+passwordBreaker.o: /usr/include/libio.h /usr/include/_G_config.h
+passwordBreaker.o: /usr/include/wchar.h /usr/include/bits/stdio_lim.h
+passwordBreaker.o: /usr/include/bits/sys_errlist.h /usr/include/stdlib.h
+passwordBreaker.o: /usr/include/sys/types.h /usr/include/time.h
+passwordBreaker.o: /usr/include/endian.h /usr/include/bits/endian.h
+passwordBreaker.o: /usr/include/bits/byteswap.h
+passwordBreaker.o: /usr/include/bits/byteswap-16.h /usr/include/sys/select.h
+passwordBreaker.o: /usr/include/bits/select.h /usr/include/bits/sigset.h
+passwordBreaker.o: /usr/include/bits/time.h /usr/include/sys/sysmacros.h
+passwordBreaker.o: /usr/include/bits/pthreadtypes.h /usr/include/alloca.h
+passwordBreaker.o: /usr/include/bits/stdlib-float.h /usr/include/string.h
+passwordBreaker.o: /usr/include/errno.h /usr/include/bits/errno.h
+passwordBreaker.o: /usr/include/linux/errno.h /usr/include/asm/errno.h
+passwordBreaker.o: /usr/include/asm-generic/errno.h
+passwordBreaker.o: /usr/include/asm-generic/errno-base.h
+passwordBreaker.o: /usr/include/netinet/in.h /usr/include/stdint.h
+passwordBreaker.o: /usr/include/bits/wchar.h /usr/include/sys/socket.h
+passwordBreaker.o: /usr/include/sys/uio.h /usr/include/bits/uio.h
+passwordBreaker.o: /usr/include/bits/socket.h /usr/include/bits/socket_type.h
+passwordBreaker.o: /usr/include/bits/sockaddr.h /usr/include/asm/socket.h
+passwordBreaker.o: /usr/include/asm-generic/socket.h
+passwordBreaker.o: /usr/include/asm/sockios.h
+passwordBreaker.o: /usr/include/asm-generic/sockios.h /usr/include/bits/in.h
+passwordBreaker.o: /usr/include/arpa/inet.h /usr/include/netdb.h
+passwordBreaker.o: /usr/include/rpc/netdb.h /usr/include/bits/netdb.h
+passwordBreaker.o: /usr/include/unistd.h /usr/include/bits/posix_opt.h
+passwordBreaker.o: /usr/include/bits/environments.h
+passwordBreaker.o: /usr/include/bits/confname.h /usr/include/getopt.h
+passwordBreaker.o: /usr/include/signal.h /usr/include/bits/signum.h
+passwordBreaker.o: /usr/include/bits/siginfo.h /usr/include/bits/sigaction.h
+passwordBreaker.o: /usr/include/bits/sigcontext.h
+passwordBreaker.o: /usr/include/bits/sigstack.h /usr/include/bits/sigthread.h
+passwordServer.o: password.h /usr/include/stdio.h /usr/include/features.h
+passwordServer.o: /usr/include/stdc-predef.h /usr/include/sys/cdefs.h
+passwordServer.o: /usr/include/bits/wordsize.h /usr/include/gnu/stubs.h
+passwordServer.o: /usr/include/bits/types.h /usr/include/bits/typesizes.h
+passwordServer.o: /usr/include/libio.h /usr/include/_G_config.h
+passwordServer.o: /usr/include/wchar.h /usr/include/bits/stdio_lim.h
+passwordServer.o: /usr/include/bits/sys_errlist.h /usr/include/stdlib.h
+passwordServer.o: /usr/include/sys/types.h /usr/include/time.h
+passwordServer.o: /usr/include/endian.h /usr/include/bits/endian.h
+passwordServer.o: /usr/include/bits/byteswap.h
+passwordServer.o: /usr/include/bits/byteswap-16.h /usr/include/sys/select.h
+passwordServer.o: /usr/include/bits/select.h /usr/include/bits/sigset.h
+passwordServer.o: /usr/include/bits/time.h /usr/include/sys/sysmacros.h
+passwordServer.o: /usr/include/bits/pthreadtypes.h /usr/include/alloca.h
+passwordServer.o: /usr/include/bits/stdlib-float.h /usr/include/string.h
+passwordServer.o: /usr/include/errno.h /usr/include/bits/errno.h
+passwordServer.o: /usr/include/linux/errno.h /usr/include/asm/errno.h
+passwordServer.o: /usr/include/asm-generic/errno.h
+passwordServer.o: /usr/include/asm-generic/errno-base.h
+passwordServer.o: /usr/include/netinet/in.h /usr/include/stdint.h
+passwordServer.o: /usr/include/bits/wchar.h /usr/include/sys/socket.h
+passwordServer.o: /usr/include/sys/uio.h /usr/include/bits/uio.h
+passwordServer.o: /usr/include/bits/socket.h /usr/include/bits/socket_type.h
+passwordServer.o: /usr/include/bits/sockaddr.h /usr/include/asm/socket.h
+passwordServer.o: /usr/include/asm-generic/socket.h
+passwordServer.o: /usr/include/asm/sockios.h
+passwordServer.o: /usr/include/asm-generic/sockios.h /usr/include/bits/in.h
+passwordServer.o: /usr/include/arpa/inet.h /usr/include/netdb.h
+passwordServer.o: /usr/include/rpc/netdb.h /usr/include/bits/netdb.h
+passwordServer.o: /usr/include/unistd.h /usr/include/bits/posix_opt.h
+passwordServer.o: /usr/include/bits/environments.h
+passwordServer.o: /usr/include/bits/confname.h /usr/include/getopt.h
+createNewPassword.o: /usr/include/stdio.h /usr/include/features.h
+createNewPassword.o: /usr/include/stdc-predef.h /usr/include/sys/cdefs.h
+createNewPassword.o: /usr/include/bits/wordsize.h /usr/include/gnu/stubs.h
+createNewPassword.o: /usr/include/bits/types.h /usr/include/bits/typesizes.h
+createNewPassword.o: /usr/include/libio.h /usr/include/_G_config.h
+createNewPassword.o: /usr/include/wchar.h /usr/include/bits/stdio_lim.h
+createNewPassword.o: /usr/include/bits/sys_errlist.h /usr/include/stdlib.h
+createNewPassword.o: /usr/include/sys/types.h /usr/include/time.h
+createNewPassword.o: /usr/include/endian.h /usr/include/bits/endian.h
+createNewPassword.o: /usr/include/bits/byteswap.h
+createNewPassword.o: /usr/include/bits/byteswap-16.h
+createNewPassword.o: /usr/include/sys/select.h /usr/include/bits/select.h
+createNewPassword.o: /usr/include/bits/sigset.h /usr/include/bits/time.h
+createNewPassword.o: /usr/include/sys/sysmacros.h
+createNewPassword.o: /usr/include/bits/pthreadtypes.h /usr/include/alloca.h
+createNewPassword.o: /usr/include/bits/stdlib-float.h password.h
+createNewPassword.o: /usr/include/string.h /usr/include/errno.h
+createNewPassword.o: /usr/include/bits/errno.h /usr/include/linux/errno.h
+createNewPassword.o: /usr/include/asm/errno.h
+createNewPassword.o: /usr/include/asm-generic/errno.h
+createNewPassword.o: /usr/include/asm-generic/errno-base.h
+createNewPassword.o: /usr/include/netinet/in.h /usr/include/stdint.h
+createNewPassword.o: /usr/include/bits/wchar.h /usr/include/sys/socket.h
+createNewPassword.o: /usr/include/sys/uio.h /usr/include/bits/uio.h
+createNewPassword.o: /usr/include/bits/socket.h
+createNewPassword.o: /usr/include/bits/socket_type.h
+createNewPassword.o: /usr/include/bits/sockaddr.h /usr/include/asm/socket.h
+createNewPassword.o: /usr/include/asm-generic/socket.h
+createNewPassword.o: /usr/include/asm/sockios.h
+createNewPassword.o: /usr/include/asm-generic/sockios.h
+createNewPassword.o: /usr/include/bits/in.h /usr/include/arpa/inet.h
+createNewPassword.o: /usr/include/netdb.h /usr/include/rpc/netdb.h
+createNewPassword.o: /usr/include/bits/netdb.h /usr/include/unistd.h
+createNewPassword.o: /usr/include/bits/posix_opt.h
+createNewPassword.o: /usr/include/bits/environments.h
+createNewPassword.o: /usr/include/bits/confname.h /usr/include/getopt.h
