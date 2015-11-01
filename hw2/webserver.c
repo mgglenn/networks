@@ -14,8 +14,8 @@ void DieWithError(char *errorMessage);
 
 int main(int argc, char *argv[]) {
 
-	int servSock;
-	int clntSock;
+	int servSock = 8080;
+	int clntSock = 8080;
 	struct sockaddr_in servAddr;
 	struct sockaddr_in clntAddr;
 	unsigned short servPort;
@@ -25,7 +25,7 @@ int main(int argc, char *argv[]) {
 	/* ./arg1.out -p 12342 server */ 
 
 	if(argc < 4) {
-		fprintf(stderr, "Usage: %s < Server Port >\n", argv[0]);
+		fprintf(stderr, "Usage: %s -p < port no > < server >\n", argv[0]);
 		exit(1);
 	}
 	else {
