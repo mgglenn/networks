@@ -26,9 +26,9 @@ int main(int argc, char *argv[]) {
 
 	int sock;
 	unsigned short webServPort = 8080;
-	//char *filename;
+	char *filename;
 
-	/* CHECK PARAMETERS 
+	/* CHECK PARAMETERS */
 
 	if (( argc < 2) || ( argc > 6 )) {	
 		fprintf(stderr, "Usage: %s < URL > [-p port] [-f filename]\n", argv[0]);
@@ -43,24 +43,23 @@ int main(int argc, char *argv[]) {
 			while (i <= argc) {
 				if(strcmp("-p", argv[i - 2]) == 0) {
 					webServPort = atoi(argv[i -1]);
-					fprintf(stderr, "port resolved\n");
+					fprintf(stdout, "port resolved\n");
 				}
 				if(strcmp("-f", argv[i - 2]) == 0) {
 					filename = argv[i - 1];
-					fprintf(stderr, "filename resolved\n");
+					fprintf(stdout, "filename resolved\n");
 				}
 				i++;
 			}
 		}
 	}
-*/
+	
 	char *url = (char *)malloc(strlen(argv[1]));
 	strcpy(url, argv[1]);
 	char *hostName = getHostName(url); 
 	char *pageName = getPageName(argv[1], strlen(hostName) + strlen("http://"));
 
 /* SOCKET */ 
-
 	if((sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP) < 0)) {
 		DieWithError("socket() failed\n");
 	}
@@ -79,7 +78,6 @@ int main(int argc, char *argv[]) {
 	}
 
 /* CONNECT */ 
-
 	for(curr = info2; curr != NULL; curr = curr->ai_next) {
     		if ((sock = socket(curr->ai_family, curr->ai_socktype, curr->ai_protocol)) == -1) {
         		DieWithError("error creating socket");	
@@ -103,13 +101,11 @@ int main(int argc, char *argv[]) {
 	}
 
 /* FORMAT REQUEST */
-
 	char *request;
 	request = formatRequest(hostName, pageName);
 	fprintf(stdout, "%s", request);
 
 /* SEND REQUEST */
-
 	if(send(sock, request, strlen(request), 0) != strlen(request)) {
 		DieWithError("send didn't send stuff correctly...\n");
 	}
@@ -122,22 +118,36 @@ int main(int argc, char *argv[]) {
 	int bytesRcvd = 0;
 	char content[BUFSIZ + 1];
 
-	printf("\n\nReceived: \n");
+	FILE *outputFile;
+
+	if(filename) {
+		outputFile = fopen(filename, "w");
+	}
 
 	while((bytesRcvd = recv(sock, content, BUFSIZ - 1, 0)) > 0) {
 		totalBytesRcvd += bytesRcvd;
 		content[bytesRcvd] = '\0';
-		printf("%s", content);	
+		if(filename) {
+			fprintf(outputFile, "%s", content);	
+		}
+		else {
+			fprintf(stdout, "%s", content);
+		}
+	}
+
+/* FINISH PROGRAM */	
+	if(filename) {
+		fclose(outputFile);
 	}
 
 	if(bytesRcvd == -1)
 		DieWithError("error reading content");
 
-/* WRITE DATA TO OUTPUT FILE, if specified */
-	
 	close (sock);
 	DieWithError("socket closed");
 }
+
+/* HELPER FUNCTIONS */
 
 void DieWithError(char *errorMessage) {
 	fprintf(stderr, "%s\n", errorMessage);
@@ -154,7 +164,6 @@ char * formatRequest(char *hostName, char *pageName) {
 }
 
 char * getHostName(char *url) {
-	
 	char *host;
 	const char delim[2] = "/";
 
