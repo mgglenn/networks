@@ -18,12 +18,15 @@
 #include <arpa/inet.h>
 
 void DieWithError(char *errMessage);
+char * formatRequest(char *hostName, char *pageName);
+char * getHostName(char *url);
+char * getPageName(char *url, int start);
 
 int main(int argc, char *argv[]) {
 
 	int sock;
 	unsigned short webServPort = 8080;
-	char *filename;
+	//char *filename;
 
 	/* CHECK PARAMETERS 
 
@@ -51,11 +54,12 @@ int main(int argc, char *argv[]) {
 		}
 	}
 */
+	char *url = (char *)malloc(strlen(argv[1]));
+	strcpy(url, argv[1]);
+	char *hostName = getHostName(url); 
+	char *pageName = getPageName(argv[1], strlen(hostName) + strlen("http://"));
 
-	char *hostName = "www.cs.clemson.edu";
-	char *pageName = "category";
-
-/* SOCKET */
+/* SOCKET */ 
 
 	if((sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP) < 0)) {
 		DieWithError("socket() failed\n");
@@ -73,6 +77,8 @@ int main(int argc, char *argv[]) {
 	if(getaddrinfo(hostName, "http", &info1, &info2)) {
 		DieWithError("error with getting address information");
 	}
+
+/* CONNECT */ 
 
 	for(curr = info2; curr != NULL; curr = curr->ai_next) {
     		if ((sock = socket(curr->ai_family, curr->ai_socktype, curr->ai_protocol)) == -1) {
@@ -93,18 +99,16 @@ int main(int argc, char *argv[]) {
     		exit(2);
 	}
 	else {
-		printf("connected\n");
+		printf("connected\n\n");
 	}
 
-	char *format = "GET /%s HTTP/1.1\r\nHost: %s\r\nUser-Agent: %s\r\nConnection: close\r\n\r\n";
-	char *get = "HTMLGET 1.1";
+/* FORMAT REQUEST */
+
 	char *request;
-	char *useragent = "HTMLGET 1.1";
+	request = formatRequest(hostName, pageName);
+	fprintf(stdout, "%s", request);
 
-	request = (char *)malloc(strlen(useragent) + strlen(get) + strlen(pageName) + strlen(hostName) - 5);
-
-	sprintf(request, format, pageName, hostName, useragent);
-	fprintf(stderr, "%s\n", request);
+/* SEND REQUEST */
 
 	if(send(sock, request, strlen(request), 0) != strlen(request)) {
 		DieWithError("send didn't send stuff correctly...\n");
@@ -113,6 +117,24 @@ int main(int argc, char *argv[]) {
 		printf("sent correctly\n");
 	}
 
+/* RECEIVE DATA */
+	int totalBytesRcvd = 0;
+	int bytesRcvd = 0;
+	char content[BUFSIZ + 1];
+
+	printf("\n\nReceived: \n");
+
+	while((bytesRcvd = recv(sock, content, BUFSIZ - 1, 0)) > 0) {
+		totalBytesRcvd += bytesRcvd;
+		content[bytesRcvd] = '\0';
+		printf("%s", content);	
+	}
+
+	if(bytesRcvd == -1)
+		DieWithError("error reading content");
+
+/* WRITE DATA TO OUTPUT FILE, if specified */
+	
 	close (sock);
 	DieWithError("socket closed");
 }
@@ -120,4 +142,31 @@ int main(int argc, char *argv[]) {
 void DieWithError(char *errorMessage) {
 	fprintf(stderr, "%s\n", errorMessage);
 	exit(1);
+}
+
+char * formatRequest(char *hostName, char *pageName) {
+	char *format = "GET %s HTTP/1.1\r\nUser-Agent: %s\r\nAccept: */*\r\nHost: %s\r\nConnection: Keep-Alive\r\n\r\n";
+        char *useragent = "mgglenn getfile";
+        char *request = (char *)malloc(strlen(format) + strlen(hostName) + strlen(pageName) + strlen(useragent) - 5);
+	sprintf(request, format, pageName, useragent, hostName);	
+	
+	return request;
+}
+
+char * getHostName(char *url) {
+	
+	char *host;
+	const char delim[2] = "/";
+
+	host = strtok(url, delim);
+	host = strtok(NULL, delim);
+
+	return host;
+}
+
+char * getPageName(char *url, int start) {
+	if(start == strlen(url))
+		return "/";
+
+	return url + start;
 }
