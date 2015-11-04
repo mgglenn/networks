@@ -9,12 +9,13 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <sys/socket.h>
-#include <arpa/inet.h>
-#include <netdb.h>
-#include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <netdb.h> 
+#include <arpa/inet.h>
 
 void DieWithError(char *errMessage);
 
@@ -50,69 +51,70 @@ int main(int argc, char *argv[]) {
 		}
 	}
 */
-	char *temp;
-	char *hostName;
-	char *pageName;
 
-	temp = strstr(argv[1], "www.");
-	strcpy(pageName, strchr(temp, '/') + 1);
+	char *hostName = "www.cs.clemson.edu";
+	char *pageName = "category";
 
-	temp = strstr(argv[1], "www.");
-	hostName = strtok(temp, "/");
+/* SOCKET */
 
-	printf("TEMP NAME: %s\n", temp);
-	printf("HOST NAME: %s\n", hostName);	
-	printf("PAGE NAME: %s\n", pageName);
-	
-/* SOCKET SHIT */
-
-	if((sock = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP) < 0)) {
+	if((sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP) < 0)) {
 		DieWithError("socket() failed\n");
 	}
 	else {
 		printf("socket made...\n");
 	}
 
+	struct addrinfo info1, *info2, *curr;
+	memset(&info1, 0, sizeof(info1));
+	info1.ai_family = AF_UNSPEC;
+	info1.ai_socktype = SOCK_STREAM;
+	info1.ai_protocol = IPPROTO_TCP;
 
-/* RESOLVE IP ADDRESS 
-
-	char *servIP = (char *)malloc(16);
-	memset(servIP, 0, 16);
-	struct hostent *host;
-
-	if((host = gethostbyname(hostName)) == NULL) {
-		DieWithError("couldn't resolve IP address");
+	if(getaddrinfo(hostName, "http", &info1, &info2)) {
+		DieWithError("error with getting address information");
 	}
 
-	if(inet_ntop(AF_INET, (void *)host->h_addr_list[0], servIP, 15) == NULL){
-		DieWithError("couldn't resolve host");
-	}
-*/
+	for(curr = info2; curr != NULL; curr = curr->ai_next) {
+    		if ((sock = socket(curr->ai_family, curr->ai_socktype, curr->ai_protocol)) == -1) {
+        		DieWithError("error creating socket");	
+			continue;
+    		}
 
-//	printf("IP: %s\n", servIP);
-
-/* MAKE SERVER ADDRESS */
-
-	//struct sockaddr_in webServAddr;	
-/*
-	memset(&webServAddr, 0, sizeof(webServAddr));
-	webServAddr.sin_family = AF_INET;
-	webServAddr.sin_addr.s_addr = inet_addr(servIP);
-	webServAddr.sin_port = htons(webServPort);
-*/
-/*
-RESOLVE SERVIP 
-
-	if (webServAddr.sin_addr.s_addr < 0) {
-		host = gethostbyname(servIP);
-		webServAddr.sin_addr.s_addr = *((unsigned long *) host->h_addr_list[0]);
+    		if (connect(sock, curr->ai_addr, curr->ai_addrlen) == -1) {
+        		close(sock);
+        		DieWithError("error on connect\n");
+			continue;
+    		}
+   		break; 
 	}
 
-	if(connect(sock, (struct sockaddr *) &webServAddr, sizeof(webServAddr)) < 0 )
-		DieWithError("connect() failed\n");
-*/	
+	if (curr == NULL) {
+    		fprintf(stderr, "failed to connect\n");
+    		exit(2);
+	}
+	else {
+		printf("connected\n");
+	}
+
+	char *format = "GET /%s HTTP/1.1\r\nHost: %s\r\nUser-Agent: %s\r\nConnection: close\r\n\r\n";
+	char *get = "HTMLGET 1.1";
+	char *request;
+	char *useragent = "HTMLGET 1.1";
+
+	request = (char *)malloc(strlen(useragent) + strlen(get) + strlen(pageName) + strlen(hostName) - 5);
+
+	sprintf(request, format, pageName, hostName, useragent);
+	fprintf(stderr, "%s\n", request);
+
+	if(send(sock, request, strlen(request), 0) != strlen(request)) {
+		DieWithError("send didn't send stuff correctly...\n");
+	}
+	else {
+		printf("sent correctly\n");
+	}
+
 	close (sock);
-	exit(0);
+	DieWithError("socket closed");
 }
 
 void DieWithError(char *errorMessage) {
