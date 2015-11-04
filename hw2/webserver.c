@@ -14,11 +14,11 @@ void DieWithError(char *errorMessage);
 
 int main(int argc, char *argv[]) {
 
-	int servSock = 8080;
-	int clntSock = 8080;
+	int servSock;
+	int clntSock; 
 	struct sockaddr_in servAddr;
 	struct sockaddr_in clntAddr;
-	unsigned short servPort;
+	unsigned short servPort = 8080; //by default
 	char *root;
 	unsigned int clntLen;
 

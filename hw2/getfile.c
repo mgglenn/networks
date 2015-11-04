@@ -21,17 +21,19 @@ void DieWithError(char *errMessage);
 char * formatRequest(char *hostName, char *pageName);
 char * getHostName(char *url);
 char * getPageName(char *url, int start);
+int clientConn(char *hostName, int webServPort);
+void clientSend(int sock, char *request);
+void clientRead(int sock, char *filename);
 
 int main(int argc, char *argv[]) {
 
-	int sock;
 	unsigned short webServPort = 8080;
 	char *filename;
 
 	/* CHECK PARAMETERS */
 
 	if (( argc < 2) || ( argc > 6 )) {	
-		fprintf(stderr, "Usage: %s < URL > [-p port] [-f filename]\n", argv[0]);
+		fprintf(stderr, "Usage: %s < URL > [-t port] [-f filename]\n", argv[0]);
 		fprintf(stderr, "URL (required): requested URL\n");
 		fprintf(stderr, "port (optional): web server port, default 8080\n");
 		fprintf(stderr, "filename (optional): doc saved as text file\n");
@@ -41,7 +43,7 @@ int main(int argc, char *argv[]) {
 		if(argc >= 4) {
 			int i = 4;
 			while (i <= argc) {
-				if(strcmp("-p", argv[i - 2]) == 0) {
+				if(strcmp("-t", argv[i - 2]) == 0) {
 					webServPort = atoi(argv[i -1]);
 					fprintf(stderr, "port resolved\n");
 				}
@@ -59,92 +61,17 @@ int main(int argc, char *argv[]) {
 	char *hostName = getHostName(url); 
 	char *pageName = getPageName(argv[1], strlen(hostName) + strlen("http://"));
 
-/* SOCKET */ 
-	if((sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP) < 0)) {
-		DieWithError("socket() failed\n");
-	}
-	else {
-		fprintf(stderr, "socket made...\n");
-	}
+	int sock = clientConn(hostName, webServPort);
 
-	struct addrinfo info1, *info2, *curr;
-	memset(&info1, 0, sizeof(info1));
-	info1.ai_family = AF_UNSPEC;
-	info1.ai_socktype = SOCK_STREAM;
-	info1.ai_protocol = IPPROTO_TCP;
-
-	if(getaddrinfo(hostName, "http", &info1, &info2)) {
-		DieWithError("error with getting address information");
-	}
-
-/* CONNECT */ 
-	for(curr = info2; curr != NULL; curr = curr->ai_next) {
-    		if ((sock = socket(curr->ai_family, curr->ai_socktype, curr->ai_protocol)) == -1) {
-        		DieWithError("error creating socket");	
-			continue;
-    		}
-
-    		if (connect(sock, curr->ai_addr, curr->ai_addrlen) == -1) {
-        		close(sock);
-        		DieWithError("error on connect\n");
-			continue;
-    		}
-   		break; 
-	}
-
-	if (curr == NULL) {
-    		fprintf(stderr, "failed to connect\n");
-    		exit(2);
-	}
-	else {
-		fprintf(stderr, "connected\n\n");
-	}
-
-/* FORMAT REQUEST */
-	char *request;
-	request = formatRequest(hostName, pageName);
+	char *request = formatRequest(hostName, pageName);
 	fprintf(stderr, "%s", request);
 
-/* SEND REQUEST */
-	if(send(sock, request, strlen(request), 0) != strlen(request)) {
-		DieWithError("send didn't send stuff correctly...\n");
-	}
-	else {
-		fprintf(stderr, "sent correctly\n");
-	}
-
-/* RECEIVE DATA */
-	int totalBytesRcvd = 0;
-	int bytesRcvd = 0;
-	char content[BUFSIZ + 1];
-
-	FILE *outputFile;
-
-	if(filename) {
-		outputFile = fopen(filename, "w");
-	}
-
-	while((bytesRcvd = recv(sock, content, BUFSIZ - 1, 0)) > 0) {
-		totalBytesRcvd += bytesRcvd;
-		content[bytesRcvd] = '\0';
-		if(filename) {
-			fprintf(outputFile, "%s", content);	
-		}
-		else {
-			fprintf(stdout, "%s", content);
-		}
-	}
-
-/* FINISH PROGRAM */	
-	if(filename) {
-		fclose(outputFile);
-	}
-
-	if(bytesRcvd == -1)
-		DieWithError("error reading content");
+	clientSend(sock, request);
+	clientRead(sock, filename);
 
 	close (sock);
-	DieWithError("socket closed");
+	fprintf(stderr, "socket closed\n");
+	exit(1);
 }
 
 /* HELPER FUNCTIONS */
@@ -178,4 +105,84 @@ char * getPageName(char *url, int start) {
 		return "/";
 
 	return url + start;
+}
+
+int clientConn(char * hostName, int webServPort) {
+	int sock = -1;
+
+        struct addrinfo info1, *info2, *curr;
+        memset(&info1, 0, sizeof(info1));
+        info1.ai_family = AF_UNSPEC;
+        info1.ai_socktype = SOCK_STREAM;
+        info1.ai_protocol = IPPROTO_TCP;
+
+        if(getaddrinfo(hostName, "http", &info1, &info2)) {
+                DieWithError("error with getting address information");
+        }
+
+        for(curr = info2; curr != NULL; curr = curr->ai_next) {
+                if ((sock = socket(curr->ai_family, curr->ai_socktype, curr->ai_protocol)) == -1) {
+                        DieWithError("error creating socket");
+                        continue;
+                }
+
+                if (connect(sock, curr->ai_addr, curr->ai_addrlen) == -1) {
+                        close(sock);
+                        DieWithError("error on connect\n");
+                        continue;
+                }
+                break;
+        }
+
+        if (curr == NULL) {
+                close(sock);
+		fprintf(stderr, "failed to connect\n");
+                exit(2);
+        }
+        else {
+                fprintf(stderr, "connected\n\n");
+        }
+
+	return sock;
+}
+
+void clientSend(int sock, char * request) {
+
+        if(send(sock, request, strlen(request), 0) != strlen(request)) {
+                DieWithError("send didn't send stuff correctly...\n");
+        }
+        else {
+                fprintf(stderr, "sent correctly\n");
+        }
+	return;
+}
+
+void clientRead(int sock, char *filename) {
+        int totalBytesRcvd = 0;
+        int bytesRcvd = 0;
+        char content[BUFSIZ + 1];
+
+        FILE *outputFile;
+
+        if(filename) {
+                outputFile = fopen(filename, "w");
+        }
+
+        while((bytesRcvd = recv(sock, content, BUFSIZ - 1, 0)) > 0) {
+                totalBytesRcvd += bytesRcvd;
+                content[bytesRcvd] = '\0';
+                if(filename) {
+                        fprintf(outputFile, "%s", content);     
+                }
+                else {
+                        fprintf(stdout, "%s", content);
+                }
+        }
+
+        if(filename) {
+                fclose(outputFile);
+        }
+
+        if(bytesRcvd == -1)
+                DieWithError("error reading content");
 }
