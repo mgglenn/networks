@@ -1,0 +1,49 @@
+HTTP/1.1 200 OK
+Date: Wed, 04 Nov 2015 07:54:32 GMT
+Server: Apache/2.2
+Last-Modified: Thu, 22 Jan 2015 20:04:25 GMT
+ETag: "1613a1-49a-50d432dc4ef15"
+Accept-Ranges: bytes
+Content-Length: 1178
+Vary: Accept-Encoding
+Keep-Alive: timeout=15, max=100
+Connection: Keep-Alive
+Content-Type: text/html
+
+<html>
+<head>
+<title>Clemson University School of Computing - Computer Help Desk</title>
+</head>
+<body>
+
+<h1 align="center">Computer Help Desk</h1>
+<h2 align="center">Clemson University School of Computing</h2>
+
+<p align="center"><a
+href="mailto:ithelp@clemson.edu">ithelp@clemson.edu</a></p>
+
+<hr/>
+
+<p>These pages provides information regarding the managed computer resources
+within the School of Computing at Clemson University. These systems are located
+primarily within McAdams Hall.</p>
+
+<p>Questions or issues regarding these systems should be directed to <a
+href="mailto:ithelp@clemson.edu">ithelp@clemson.edu</a>.</p>
+</td>
+
+<h2>Topics</h2>
+<ul>
+<li><a href="/motd">Message of the Day (/etc/motd)</a> - Includes a list of
+public access machines.</li>
+<li><a href="unixaccount.html">UNIX Accounts</a> - How to access your account,
+details about your account.</li>
+<li><a href="submit.html">Using Webhandin</a> -
+Instructions on how to use Webhandin - a custom web application
+that we have for turning in assignments to instructors.</li>
+<li><a href="linux-workshop">Linux Workshop</a> - A workshop we do for CP SC
+101 and CP SC 210 students.</li>
+</ul>
+
+</body>
+</html>

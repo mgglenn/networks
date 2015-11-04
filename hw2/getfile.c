@@ -43,11 +43,11 @@ int main(int argc, char *argv[]) {
 			while (i <= argc) {
 				if(strcmp("-p", argv[i - 2]) == 0) {
 					webServPort = atoi(argv[i -1]);
-					fprintf(stdout, "port resolved\n");
+					fprintf(stderr, "port resolved\n");
 				}
 				if(strcmp("-f", argv[i - 2]) == 0) {
 					filename = argv[i - 1];
-					fprintf(stdout, "filename resolved\n");
+					fprintf(stderr, "filename resolved\n");
 				}
 				i++;
 			}
@@ -64,7 +64,7 @@ int main(int argc, char *argv[]) {
 		DieWithError("socket() failed\n");
 	}
 	else {
-		printf("socket made...\n");
+		fprintf(stderr, "socket made...\n");
 	}
 
 	struct addrinfo info1, *info2, *curr;
@@ -97,20 +97,20 @@ int main(int argc, char *argv[]) {
     		exit(2);
 	}
 	else {
-		printf("connected\n\n");
+		fprintf(stderr, "connected\n\n");
 	}
 
 /* FORMAT REQUEST */
 	char *request;
 	request = formatRequest(hostName, pageName);
-	fprintf(stdout, "%s", request);
+	fprintf(stderr, "%s", request);
 
 /* SEND REQUEST */
 	if(send(sock, request, strlen(request), 0) != strlen(request)) {
 		DieWithError("send didn't send stuff correctly...\n");
 	}
 	else {
-		printf("sent correctly\n");
+		fprintf(stderr, "sent correctly\n");
 	}
 
 /* RECEIVE DATA */
