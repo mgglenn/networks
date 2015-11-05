@@ -24,14 +24,14 @@ char * getPageName(char *url, int start);
 int clientConn(char *hostName, int webServPort);
 void clientSend(int sock, char *request);
 void clientRead(int sock, char *filename);
+void clientWrite(char * content, char *filename);
 
 int main(int argc, char *argv[]) {
 
-	unsigned short webServPort = 80;
-	char *filename;
+	unsigned short webServPort = 8080;
+	char *filename = "n/a";
 
 	/* CHECK PARAMETERS */
-
 	if (( argc < 2) || ( argc > 6 )) {	
 		fprintf(stderr, "Usage: %s < URL > [-t port] [-f filename]\n", argv[0]);
 		fprintf(stderr, "URL (required): requested URL\n");
@@ -55,11 +55,25 @@ int main(int argc, char *argv[]) {
 			}
 		}
 	}
-	
+
+	/* resolve host and page names */
+	char *hostName, *pageName;
 	char *url = (char *)malloc(strlen(argv[1]));
 	strcpy(url, argv[1]);
-	char *hostName = getHostName(url); 
-	char *pageName = getPageName(argv[1], strlen(hostName) + strlen("http://"));
+
+	hostName = argv[1];
+
+	if(strstr(hostName, "http://")) {
+		webServPort = 80;
+		hostName = getHostName(url);
+		pageName = getPageName(argv[1], strlen(hostName) + strlen("http://"));
+	}
+	else {
+		hostName = argv[1];
+		pageName = "/";
+	}
+
+	fprintf(stderr, "HOST %s PAGE %s\n", hostName, pageName);
 
 	int sock = clientConn(hostName, webServPort);
 
@@ -141,42 +155,60 @@ int clientConn(char *hostName, int webServPort) {
 }
 
 void clientSend(int sock, char * request) {
-
         if(send(sock, request, strlen(request), 0) != strlen(request)) {
                 DieWithError("send didn't send stuff correctly...\n");
         }
         else {
-                fprintf(stderr, "sent correctly\n");
+                fprintf(stderr, "sent correctly\n\n");
         }
 	return;
 }
 
 void clientRead(int sock, char *filename) {
-        int totalBytesRcvd = 0;
         int bytesRcvd = 0;
         char content[BUFSIZ + 1];
+	int totalBytesRcvd = -1;
 
-        FILE *outputFile;
+       	while((bytesRcvd = recv(sock, content, BUFSIZ - 1,0)) > 0) {	
+		if(totalBytesRcvd == -1) totalBytesRcvd = bytesRcvd;
+		
+		totalBytesRcvd += bytesRcvd;
+	}
 
-        if(filename) {
-                outputFile = fopen(filename, "w");
+	if(totalBytesRcvd == -1) DieWithError("nothing recvd");
+	
+	printf("TOTAL BYTES: %d\n", bytesRcvd);
+	content[(totalBytesRcvd)] = '\0';
+	clientWrite(content, filename);
+}
+
+void clientWrite(char * content, char *filename) {
+	
+	FILE *outputFile = NULL;
+	
+	if(strcmp(filename, "n/a") != 0) {
+        	outputFile = fopen(filename, "w");
         }
 
-        while((bytesRcvd = recv(sock, content, BUFSIZ - 1, 0)) > 0) {
-                totalBytesRcvd += bytesRcvd;
-                content[bytesRcvd] = '\0';
-                if(filename) {
-                        fprintf(outputFile, "%s", content);     
-                }
-                else {
-                        fprintf(stdout, "%s", content);
-                }
-        }
+	int i = 0;
 
-        if(filename) {
+//	printf("H"); 
+	while(content[i] != '<'){
+		 fprintf(stdout, "%c", content[i]); 
+		 i++;
+	}
+
+	while(content[i] != '\0') {
+		if(strcmp(filename, "n/a") != 0) {
+			fprintf(outputFile, "%c", content[i]);
+		} 
+		else {
+			fprintf(stdout, "%c", content[i]);
+		}
+		i++; 
+	}
+	
+        if(strcmp(filename, "n/a") != 0) {
                 fclose(outputFile);
         }
-
-        if(bytesRcvd == -1)
-                DieWithError("error reading content");
 }

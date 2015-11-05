@@ -1,6 +1,13 @@
 /*
 * Mary Grace Glenn (mgglenn)
 * CPSC 3600 homework 2
+*
+* 200
+* 400
+* 403
+* 404
+* 405
+* 414
 */
 
 #include <stdio.h>      /* for printf() and fprintf() */
@@ -11,20 +18,29 @@
 #include <unistd.h>     /* for close() */
 
 void DieWithError(char *errorMessage);
+void servReply(int clntSock);
+void respond200();
+void respond400();
+void respond403();
+void respond404();
+void respond405();
+void respond414();
+char *formatReply(char *request);
+
+char * format = "HTTP/1.1 %s\r\nDate: %s\r\nLast-Modified: %s\r\nContent -Type: %s\r\nContent -Length: %d\r\nServer: mgglenn webserver/1.2\r\nConnection: close\r\n\r\n";
 
 int main(int argc, char *argv[]) {
 
 	int servSock;
-	int clntSock; 
+	int clntSock;
 	struct sockaddr_in servAddr;
 	struct sockaddr_in clntAddr;
-	unsigned short servPort = 8080; //by default
-	char *root;
+	unsigned short servPort = 8080;
 	unsigned int clntLen;
+	//char * directory = "./";
 
-	char * directory;
-
-        if (( argc < 2) || ( argc > 4 )) {
+/* CHECK PARAMETERS */
+        if ((argc > 4 )) {
                 fprintf(stderr, "Usage: %s [-t port] [directory]\n", argv[0]);
                 fprintf(stderr, "port (optional): web server port, default 8080\n");
                 fprintf(stderr, "directory (optional): directory of file system, default is ./\n");
@@ -40,50 +56,80 @@ int main(int argc, char *argv[]) {
 					i++;
                                 }
                                 else if (servPort != 8080) {
-                                        directory = argv[i];
+                                        //directory = argv[i];
                                         fprintf(stderr, "directory resolved\n");
                                 }
                                 i++;
                         }
                 }
         }
-/*
-	servSock = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
-	
-	if(servSock < 0) {
-		DieWithError("socket() failed");
-	}
+
+/* SOCKET STUFF */
+	if((servSock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0)
+		DieWithError("error creating socket");
 
 	memset(&servAddr, 0, sizeof(servAddr));
 	servAddr.sin_family = AF_INET;
 	servAddr.sin_addr.s_addr = htonl(INADDR_ANY);
 	servAddr.sin_port = htons(servPort);
 
-
 	if(bind(servSock, (struct sockaddr *) &servAddr, sizeof(servAddr)) < 0) {
-		DieWithError("bind() failed");
+		DieWithError("error binding socket");
 	}
 
-	if(listen(servSock, 5) < 0) {
-		DieWithError("listen failed");
+	fprintf(stderr, "socked made and bound...\n");
+
+	if(listen(servSock, 5) < 0 ) {
+		DieWithError("error with socket listening");
 	}
 
-	while(1) {
+	fprintf(stderr, "waiting for client...\n");
+
+	for(;;) {
 		clntLen = sizeof(clntAddr);
-
-		clntSock = accept(servSock, (struct sockaddr *) &clntAddr, &clntLen);
-
-		if(clntSock < 0) {
-			DieWithError("accept failed");
+		
+		if((clntSock = accept(servSock, (struct sockaddr *)&clntAddr, &clntLen)) < 0) {
+			DieWithError("socket failed to accept client");
 		}
-		else {
-			printf("client connected! \n");
-		}
-	}
-*/
+
+		printf("Handling client %s\n", inet_ntoa(clntAddr.sin_addr));
+		servReply(clntSock);
+	}	
 }
 
 void DieWithError(char *errorMessage) {
 	fprintf(stderr, "%s\n", errorMessage);
 	exit(0);
 }
+
+void servReply(int clntSock) {
+
+	char content[BUFSIZ +1];
+	int rcvMsgSize;
+
+	if((rcvMsgSize = recv(clntSock, content, BUFSIZ, 0) < 0))
+		DieWithError("recv() failed");
+
+	printf("%s\n", content);
+
+	char *reply = "message received\n";
+
+	if(send(clntSock, reply, strlen(reply), 0) != strlen(reply))
+		DieWithError("error sending to client");
+
+	printf("message sent\n");
+	close(clntSock);
+	return;
+}
+
+char *formatReply(char *filename) {
+
+	return "";
+}
+
+void respond200() {}
+void respond400() {}
+void respond403() {}
+void respond404() {}
+void respond405() {}
+void respond414() {}
