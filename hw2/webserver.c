@@ -22,27 +22,32 @@ int main(int argc, char *argv[]) {
 	char *root;
 	unsigned int clntLen;
 
-	/* ./arg1.out -p 12342 server */ 
+	char * directory;
 
-	if(argc < 4) {
-		fprintf(stderr, "Usage: %s -p < port no > < server >\n", argv[0]);
-		exit(1);
-	}
-	else {
-		int i = 1;
-		while(i < argc -1) {
-			if(strcmp("-p", argv[i]) == 0) {
-				servPort = atoi(argv[i + 1]);
-				fprintf(stderr, "port resolved\n");
-			}
-			else {
-				root = argv[i];	
-				fprintf(stderr, "root resolved\n");	
-			}
-			i++;
-		}
-	}
-
+        if (( argc < 2) || ( argc > 4 )) {
+                fprintf(stderr, "Usage: %s [-t port] [directory]\n", argv[0]);
+                fprintf(stderr, "port (optional): web server port, default 8080\n");
+                fprintf(stderr, "directory (optional): directory of file system, default is ./\n");
+                exit(1);
+        }
+        else {
+                if(argc >= 2) {
+                        int i = 1;
+                        while (i < argc) {
+                                if(strcmp("-t", argv[i]) == 0) {
+                                        servPort = atoi(argv[i +1]);
+                                        fprintf(stderr, "port resolved\n");
+					i++;
+                                }
+                                else if (servPort != 8080) {
+                                        directory = argv[i];
+                                        fprintf(stderr, "directory resolved\n");
+                                }
+                                i++;
+                        }
+                }
+        }
+/*
 	servSock = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
 	
 	if(servSock < 0) {
@@ -54,7 +59,6 @@ int main(int argc, char *argv[]) {
 	servAddr.sin_addr.s_addr = htonl(INADDR_ANY);
 	servAddr.sin_port = htons(servPort);
 
-	/* Bind to local address */
 
 	if(bind(servSock, (struct sockaddr *) &servAddr, sizeof(servAddr)) < 0) {
 		DieWithError("bind() failed");
@@ -76,6 +80,7 @@ int main(int argc, char *argv[]) {
 			printf("client connected! \n");
 		}
 	}
+*/
 }
 
 void DieWithError(char *errorMessage) {

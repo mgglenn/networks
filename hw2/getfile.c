@@ -27,7 +27,7 @@ void clientRead(int sock, char *filename);
 
 int main(int argc, char *argv[]) {
 
-	unsigned short webServPort = 8080;
+	unsigned short webServPort = 80;
 	char *filename;
 
 	/* CHECK PARAMETERS */
@@ -107,41 +107,35 @@ char * getPageName(char *url, int start) {
 	return url + start;
 }
 
-int clientConn(char * hostName, int webServPort) {
-	int sock = -1;
+int clientConn(char *hostName, int webServPort) {
+	int sock = socket(AF_INET, SOCK_STREAM, 0);
+	
+	if(sock < 0) DieWithError("error with socket()");
 
-        struct addrinfo info1, *info2, *curr;
-        memset(&info1, 0, sizeof(info1));
-        info1.ai_family = AF_UNSPEC;
-        info1.ai_socktype = SOCK_STREAM;
-        info1.ai_protocol = IPPROTO_TCP;
+	struct hostent *host;
+	host = gethostbyname(hostName);
 
-        if(getaddrinfo(hostName, "http", &info1, &info2)) {
-                DieWithError("error with getting address information");
-        }
+	if(host == NULL) {
+		close(sock);
+		DieWithError("getbyhostname() failed");
+	}
 
-        for(curr = info2; curr != NULL; curr = curr->ai_next) {
-                if ((sock = socket(curr->ai_family, curr->ai_socktype, curr->ai_protocol)) == -1) {
-                        DieWithError("error creating socket");
-                        continue;
-                }
+	unsigned int index = 0;
 
-                if (connect(sock, curr->ai_addr, curr->ai_addrlen) == -1) {
-                        close(sock);
-                        DieWithError("error on connect\n");
-                        continue;
-                }
-                break;
-        }
+	while(host->h_addr_list[index] != NULL) {
+		inet_ntoa(*(struct in_addr*)(host->h_addr_list[index]));
+		index++;
+	}
+	
+	struct sockaddr_in webServAddr;
+	memset(&webServAddr, 0, sizeof(webServAddr));
 
-        if (curr == NULL) {
-                close(sock);
-		fprintf(stderr, "failed to connect\n");
-                exit(2);
-        }
-        else {
-                fprintf(stderr, "connected\n\n");
-        }
+	webServAddr.sin_family = AF_INET;
+	bcopy((char *)host->h_addr, (char *)&webServAddr.sin_addr.s_addr, host->h_length);
+	webServAddr.sin_port = htons(webServPort);
+
+	if (connect(sock, (struct sockaddr *) &webServAddr, sizeof(webServAddr)) < 0)
+		DieWithError("error on connect");
 
 	return sock;
 }
