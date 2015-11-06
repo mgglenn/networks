@@ -5,8 +5,8 @@ PROGS =	 getfile webserver
 OPTIONS = -DUNIX  -DUSE_SIGACTION -DANSI
 
 
-COBJECTS = getfileHelper.o	
-CSOURCES = getfileHelper.c
+COBJECTS = getfileHelper.o	webserverHelper.o	
+CSOURCES = getfileHelper.c	webserverHelper.c
 
 CPLUSOBJECTS = 
 

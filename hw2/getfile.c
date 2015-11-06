@@ -67,10 +67,13 @@ int main(int argc, char *argv[]) {
 		webServPort = 80;
 		hostName = getHostName(url);
 		pageName = getPageName(argv[1], strlen(hostName) + strlen("http://"));
+
+		//getPageName(argv[1], strlen(hostName) + strlen("http://"));
 	}
 	else {
-		hostName = argv[1];
-		pageName = "/";
+		const char delim[2] = "/";
+        	hostName = strtok(url, delim);
+		pageName = getPageName(argv[1], strlen(hostName));
 	}
 
 	fprintf(stderr, "HOST %s PAGE %s\n", hostName, pageName);

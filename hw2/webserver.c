@@ -17,14 +17,8 @@
 #include <string.h>     /* for memset() */
 #include <unistd.h>     /* for close() */
 
-void DieWithError(char *errorMessage);
-void servReply(int clntSock);
-void respond200();
-void respond400();
-void respond403();
-void respond404();
-void respond405();
-void respond414();
+void ServDieWithError(char *errorMessage);
+void servReply(int clntSock, char *directory);
 char *formatReply(char *request);
 
 char * format = "HTTP/1.1 %s\r\nDate: %s\r\nLast-Modified: %s\r\nContent -Type: %s\r\nContent -Length: %d\r\nServer: mgglenn webserver/1.2\r\nConnection: close\r\n\r\n";
@@ -37,7 +31,7 @@ int main(int argc, char *argv[]) {
 	struct sockaddr_in clntAddr;
 	unsigned short servPort = 8080;
 	unsigned int clntLen;
-	//char * directory = "./";
+	char * directory = NULL;
 
 /* CHECK PARAMETERS */
         if ((argc > 4 )) {
@@ -56,7 +50,7 @@ int main(int argc, char *argv[]) {
 					i++;
                                 }
                                 else if (servPort != 8080) {
-                                        //directory = argv[i];
+                                        directory = argv[i];
                                         fprintf(stderr, "directory resolved\n");
                                 }
                                 i++;
@@ -66,7 +60,7 @@ int main(int argc, char *argv[]) {
 
 /* SOCKET STUFF */
 	if((servSock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0)
-		DieWithError("error creating socket");
+		ServDieWithError("error creating socket");
 
 	memset(&servAddr, 0, sizeof(servAddr));
 	servAddr.sin_family = AF_INET;
@@ -74,13 +68,13 @@ int main(int argc, char *argv[]) {
 	servAddr.sin_port = htons(servPort);
 
 	if(bind(servSock, (struct sockaddr *) &servAddr, sizeof(servAddr)) < 0) {
-		DieWithError("error binding socket");
+		ServDieWithError("error binding socket");
 	}
 
 	fprintf(stderr, "socked made and bound...\n");
 
 	if(listen(servSock, 5) < 0 ) {
-		DieWithError("error with socket listening");
+		ServDieWithError("error with socket listening");
 	}
 
 	fprintf(stderr, "waiting for client...\n");
@@ -89,47 +83,11 @@ int main(int argc, char *argv[]) {
 		clntLen = sizeof(clntAddr);
 		
 		if((clntSock = accept(servSock, (struct sockaddr *)&clntAddr, &clntLen)) < 0) {
-			DieWithError("socket failed to accept client");
+			ServDieWithError("socket failed to accept client");
 		}
 
 		printf("Handling client %s\n", inet_ntoa(clntAddr.sin_addr));
-		servReply(clntSock);
+		servReply(clntSock, directory);
 	}	
 }
 
-void DieWithError(char *errorMessage) {
-	fprintf(stderr, "%s\n", errorMessage);
-	exit(0);
-}
-
-void servReply(int clntSock) {
-
-	char content[BUFSIZ +1];
-	int rcvMsgSize;
-
-	if((rcvMsgSize = recv(clntSock, content, BUFSIZ, 0) < 0))
-		DieWithError("recv() failed");
-
-	printf("%s\n", content);
-
-	char *reply = "message received\n";
-
-	if(send(clntSock, reply, strlen(reply), 0) != strlen(reply))
-		DieWithError("error sending to client");
-
-	printf("message sent\n");
-	close(clntSock);
-	return;
-}
-
-char *formatReply(char *filename) {
-
-	return "";
-}
-
-void respond200() {}
-void respond400() {}
-void respond403() {}
-void respond404() {}
-void respond405() {}
-void respond414() {}
