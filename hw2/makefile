@@ -5,8 +5,8 @@ PROGS =	 getfile webserver
 OPTIONS = -DUNIX  -DUSE_SIGACTION -DANSI
 
 
-COBJECTS =	
-CSOURCES =	
+COBJECTS = getfileHelper.o	
+CSOURCES = getfileHelper.c
 
 CPLUSOBJECTS = 
 
@@ -17,7 +17,7 @@ CPLUSSOURCES =
 all:	${PROGS}
 
 
-getfile:	getfile.o $(CPLUSOBJECTS) $(COBJECTS) $(LIBS) $(COMMONSOURCES) $(SOURCES)
+getfile:	getfile.o $(CPLUSOBJECTS) $(COBJECTS) $(LIBS) $(COMMONSOURCES) $(CSOURCES)
 		${CC} $(INCLUDES) ${LINKOPTIONS}  $@ getfile.o $(CPLUSOBJECTS) $(COBJECTS) $(LIBS) $(LINKFLAGS)
 
 
