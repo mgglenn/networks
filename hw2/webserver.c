@@ -1,13 +1,8 @@
 /*
 * Mary Grace Glenn (mgglenn)
 * CPSC 3600 homework 2
-*
-* 200
-* 400
-* 403
-* 404
-* 405
-* 414
+* This server serves up files from its local directory or specified directory,
+* on a given port or by 8080 by default. Uses HTTP over TCP.
 */
 
 #include <stdio.h>      /* for printf() and fprintf() */
@@ -19,19 +14,21 @@
 
 void ServDieWithError(char *errorMessage);
 void servReply(int clntSock, char *directory);
-char *formatReply(char *request);
 
-char * format = "HTTP/1.1 %s\r\nDate: %s\r\nLast-Modified: %s\r\nContent -Type: %s\r\nContent -Length: %d\r\nServer: mgglenn webserver/1.2\r\nConnection: close\r\n\r\n";
 
+/*
+* Handles GET and HEAD requests. 
+*
+*/
 int main(int argc, char *argv[]) {
 
 	int servSock;
 	int clntSock;
 	struct sockaddr_in servAddr;
 	struct sockaddr_in clntAddr;
-	unsigned short servPort = 8080;
+	unsigned short servPort = 1;
 	unsigned int clntLen;
-	char * directory = NULL;
+	char * directory = "."; //default
 
 /* CHECK PARAMETERS */
         if ((argc > 4 )) {
@@ -49,7 +46,7 @@ int main(int argc, char *argv[]) {
                                         fprintf(stderr, "port resolved\n");
 					i++;
                                 }
-                                else if (servPort != 8080) {
+                                else if (servPort != 1) {
                                         directory = argv[i];
                                         fprintf(stderr, "directory resolved\n");
                                 }
@@ -58,7 +55,9 @@ int main(int argc, char *argv[]) {
                 }
         }
 
-/* SOCKET STUFF */
+	if(servPort == 1) servPort = 8080;
+
+/* SOCKET SET UP */
 	if((servSock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0)
 		ServDieWithError("error creating socket");
 
@@ -79,6 +78,7 @@ int main(int argc, char *argv[]) {
 
 	fprintf(stderr, "waiting for client...\n");
 
+/* WAIT FOR CLIENTS */
 	for(;;) {
 		clntLen = sizeof(clntAddr);
 		
@@ -86,7 +86,7 @@ int main(int argc, char *argv[]) {
 			ServDieWithError("socket failed to accept client");
 		}
 
-		printf("Handling client %s\n", inet_ntoa(clntAddr.sin_addr));
+		fprintf(stderr, "Handling client %s\n", inet_ntoa(clntAddr.sin_addr));
 		servReply(clntSock, directory);
 	}	
 }

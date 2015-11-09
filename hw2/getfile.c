@@ -26,6 +26,10 @@ void clientSend(int sock, char *request);
 void clientRead(int sock, char *filename);
 void clientWrite(char * content, char *filename);
 
+/*
+* Sends simple GET requests to a server over a user specified port,
+* with teh option of writing it to a file filename following -f
+*/
 int main(int argc, char *argv[]) {
 
 	unsigned short webServPort = 8080;
@@ -64,11 +68,10 @@ int main(int argc, char *argv[]) {
 	hostName = argv[1];
 
 	if(strstr(hostName, "http://")) {
-		webServPort = 80;
+		if(strstr(hostName, "www")) webServPort = 80;
+
 		hostName = getHostName(url);
 		pageName = getPageName(argv[1], strlen(hostName) + strlen("http://"));
-
-		//getPageName(argv[1], strlen(hostName) + strlen("http://"));
 	}
 	else {
 		const char delim[2] = "/";

@@ -1,3 +1,10 @@
+/*
+* Mary Grace Glenn (mgglenn)
+* CPSC 3600 homework 2
+* getfileHelper.c
+* Contains all functions allowing for functionality of HTTP TCP web client.
+*/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -8,20 +15,29 @@
 #include <netdb.h>
 #include <arpa/inet.h>
 
+/*
+* Client exit function.
+*/
 void ClientDieWithError(char *errorMessage) {
         fprintf(stderr, "%s\n", errorMessage);
         exit(1);
 }
 
+/*
+* Properly formats a given HTTP request.
+*/
 char * formatRequest(char *hostName, char *pageName) {
         char *format = "GET %s HTTP/1.1\r\nUser-Agent: %s\r\nAccept: */*\r\nHost: %s\r\nConnection: Keep-Alive\r\n\r\n";
-        char *useragent = "mgglenn getfile";
+        char *useragent = "MGGCLIENT";
         char *request = (char *)malloc(strlen(format) + strlen(hostName) + strlen(pageName) + strlen(useragent) - 5);
         sprintf(request, format, pageName, useragent, hostName);
 
         return request;
 }
 
+/*
+* Derives host name from a given url.
+*/
 char * getHostName(char *url) {
         char *host;
         const char delim[2] = "/";
@@ -32,6 +48,7 @@ char * getHostName(char *url) {
         return host;
 }
 
+/* Derives host name from a given url */
 char * getPageName(char *url, int start) {
         if(start == strlen(url))
                 return "/";
@@ -39,6 +56,7 @@ char * getPageName(char *url, int start) {
         return url + start;
 }
 
+/* Returns client socket for sending information, establishes connection to server */
 int clientConn(char *hostName, int webServPort) {
         int sock = socket(AF_INET, SOCK_STREAM, 0);
 
@@ -72,62 +90,48 @@ int clientConn(char *hostName, int webServPort) {
         return sock;
 }
 
+/* 
+* Sends given formatted request to server socket.
+*/
 void clientSend(int sock, char * request) {
         if(send(sock, request, strlen(request), 0) != strlen(request)) {
-                ClientDieWithError("send didn't send stuff correctly...\n");
+                ClientDieWithError("error on send");
         }
-        else {
-                fprintf(stderr, "sent correctly\n\n");
-        }
-        return;
+        
+	return;
 }
 
-void clientWrite(char * content, char *filename) {
+/*
+* Receives sent data from client, enables chunking.
+*/ 
+void clientRead(int sock, char *filename) {
+       
+	FILE *outputFile = NULL; 
 
-        FILE *outputFile = NULL;
-
-        if(strcmp(filename, "n/a") != 0) {
+	if(strcmp(filename, "n/a") != 0) {
                 outputFile = fopen(filename, "w");
         }
 
-        int i = 0;
+	int bytesRcvd = 0;
+        char content[(15 * BUFSIZ) + 1];
 
-//      printf("H"); 
-        while(content[i] != '<'){
-                 fprintf(stdout, "%c", content[i]);
-                 i++;
+	memset(content, 0, sizeof(content));
+
+	while((bytesRcvd = recv(sock, content, (BUFSIZ * 15), 0)) > 0) {
+
+	 	if(strcmp(filename, "n/a") != 0) {
+         		fprintf(outputFile, "%s", content);
+         	}
+        	 else {
+                 	fprintf(stdout, "%s", content);
+         	}
+
+		if(strstr(content, "</html>") != NULL) break;
+
+		memset(content, 0, bytesRcvd);
         }
-
-        while(content[i] != '\0') {
                 if(strcmp(filename, "n/a") != 0) {
-                        fprintf(outputFile, "%c", content[i]);
+                        fclose(outputFile);
                 }
-                else {
-                        fprintf(stdout, "%c", content[i]);
-                }
-                i++;
-        }
-
-        if(strcmp(filename, "n/a") != 0) {
-                fclose(outputFile);
-        }
-}
-
-
-void clientRead(int sock, char *filename) {
-        int bytesRcvd = 0;
-        char content[BUFSIZ + 1];
-        int totalBytesRcvd = -1;
-
-        while((bytesRcvd = recv(sock, content, BUFSIZ - 1,0)) > 0) {
-                if(totalBytesRcvd == -1) totalBytesRcvd = bytesRcvd;
-
-                totalBytesRcvd += bytesRcvd;
-        }
-
-        if(totalBytesRcvd == -1) ClientDieWithError("nothing recvd");
-
-        printf("TOTAL BYTES: %d\n", bytesRcvd);
-        content[(totalBytesRcvd)] = '\0';
-        clientWrite(content, filename);
+	fprintf(stderr, "\nfinished writing.\n");
 }
