@@ -247,7 +247,7 @@ int getResponse(char *content, char *directory) {
 	}
 
         /*check URI */
-        if((strlen(servResponse.page) + strlen(servResponse.host) + strlen("http://") - strlen(directory)) > 31) {
+        if((strlen(servResponse.page) + strlen(servResponse.host) + strlen("http://") - strlen(directory)) > 200) {
 		 return 414;
 	}
 
