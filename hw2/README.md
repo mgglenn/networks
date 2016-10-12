@@ -7,16 +7,6 @@ CONTENTS OF THIS FILE
 * 5. Design
 
 -------------------------------------------------------------------------------
-SECTION 1 - NAME AND PROJECT DESCRIPTION
--------------------------------------------------------------------------------
-Program Author: Mary Grace Glenn (mgglenn)
-Program Name: CPSC 3600 Homework 2 - HTTP WebServer and Client
-CUID: C10064065
-Project Due: Sunday, November 8, 2015
-Course: CPSC 3600 - 001
-Instructor: Remy, Sekou
-
--------------------------------------------------------------------------------
 SECTION 2 - PROJECT DESCRIPTION
 -------------------------------------------------------------------------------
 This project implements a simple web server and simple web client. The client
