@@ -1,1 +1,1 @@
-# cpsc3600
+readme
