@@ -1,6 +1,5 @@
 /*
 * Mary Grace Glenn (mgglenn)
-* CPSC 3600 homework 2
 * getfileHelper.c
 * Contains all functions allowing for functionality of HTTP TCP web client.
 */
